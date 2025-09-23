@@ -1,0 +1,19 @@
+---
+- name: Install MariaDB
+  apt:
+    name: mariadb-server
+    state: present
+    update_cache: yes
+
+- name: Start MariaDB
+  service:
+    name: mysql
+    state: started
+    enabled: true
+
+- name: Import seed data (optional)
+  mysql_db:
+    name: angular_db
+    state: import
+    target: /path/to/seed.sql
+...

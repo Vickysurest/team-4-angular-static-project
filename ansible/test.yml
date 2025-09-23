@@ -1,0 +1,10 @@
+---
+- name: Run Angular Tests
+  hosts: buildserver
+  gather_facts: no
+  tasks:
+    - name: Run unit tests
+      shell: npm test --watch=false
+      args:
+        chdir: /path/to/angular/project
+...

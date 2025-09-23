@@ -1,0 +1,10 @@
+---
+- name: Deploy Angular App to Apache Server
+  hosts: webservers
+  become: true
+  vars:
+    version: "v1.0.0"
+  roles:
+    - apache
+    - angular
+...
