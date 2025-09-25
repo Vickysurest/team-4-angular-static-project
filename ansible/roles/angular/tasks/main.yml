@@ -1,0 +1,19 @@
+---
+- name: Create release directory
+  file:
+    path: "/var/www/html/releases/{{ version }}"
+    state: directory
+
+- name: Copy artifact to remote
+  unarchive:
+    src: "files/angular-devops-{{ version }}.tar.gz"
+    dest: "/var/www/html/releases/{{ version }}"
+    remote_src: no
+
+- name: Update symlink to point to current version
+  file:
+    src: "/var/www/html/releases/{{ version }}"
+    dest: "/var/www/html/current"
+    state: link
+    force: true
+...

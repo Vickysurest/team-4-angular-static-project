@@ -1,0 +1,33 @@
+---
+- name: Build Angular App
+  hosts: buildserver
+  gather_facts: no
+  vars:
+    version: "v1.0.0"
+  tasks:
+    - name: Ensure Angular CLI is installed
+      shell: npm install -g @angular/cli
+      args:
+        creates: /usr/bin/ng
+
+    - name: Install dependencies
+      shell: npm install
+      args:
+        chdir: /path/to/angular/project
+
+    - name: Build Angular app
+      shell: ng build --configuration production
+      args:
+        chdir: /path/to/angular/project
+
+    - name: Create tar.gz artifact
+      shell: |
+        mkdir -p /tmp/angular-artifacts
+        tar -czvf /tmp/angular-artifacts/angular-devops-{{ version }}.tar.gz -C /path/to/angular/project/dist/angular-devops .
+      register: tar_output
+
+    - name: Copy artifact to files directory
+      copy:
+        src: /tmp/angular-artifacts/angular-devops-{{ version }}.tar.gz
+        dest: ./files/
+...
