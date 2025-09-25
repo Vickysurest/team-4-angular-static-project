@@ -15,7 +15,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Clone the repo
-                git url: "${env.REPO_URL}", branch: 'main'
+                git url: "${env.REPO_URL}", branch: 'dev'
             }
         }
 
