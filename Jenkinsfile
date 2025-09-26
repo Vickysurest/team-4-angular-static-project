@@ -8,7 +8,8 @@ pipeline {
 
     environment {
         REPO_URL = 'https://github.com/Vickysurest/team-4-angular-static-project.git'
-        ANSIBLE_HOST_KEY_CHECKING = 'False'
+        ANSIBLE_HOST_KEY_CHECKING = 'False'  // Prevent "host key verification failed"
+        INVENTORY_PATH = '/home/ec2-user/ansible/hosts.ini'
     }
 
     stages {
@@ -16,14 +17,27 @@ pipeline {
             steps {
                 echo "📥 Cloning repository from ${env.REPO_URL}"
                 git url: "${env.REPO_URL}", branch: 'dev'
-                sh 'ls -la'  // Confirm files are there
+                sh 'ls -la'
             }
         }
 
-        stage('Verify files') {
+        stage('Prepare Ansible Files') {
             steps {
-                echo "🔍 Verifying required files"
-                sh 'ls -l hosts.ini build.yml test.yml deploy.yml'
+                echo "📂 Copying Ansible files to permanent directory"
+                sh """
+                    mkdir -p /home/ec2-user/ansible
+                    cp hosts.ini /home/ec2-user/ansible/hosts.ini
+                    cp build.yml /home/ec2-user/ansible/
+                    cp test.yml /home/ec2-user/ansible/
+                    cp deploy.yml /home/ec2-user/ansible/
+                """
+            }
+        }
+
+        stage('Verify Ansible Inventory') {
+            steps {
+                echo "🔍 Verifying inventory and playbooks"
+                sh 'ls -l /home/ec2-user/ansible/'
             }
         }
 
@@ -33,7 +47,7 @@ pipeline {
                 echo "🔧 Running build playbook for version ${params.VERSION}"
                 sh """
                     set -e
-                    ansible-playbook -i hosts.ini build.yml -e version=${params.VERSION}
+                    ansible-playbook -i ${env.INVENTORY_PATH} /home/ec2-user/ansible/build.yml -e version=${params.VERSION}
                 """
             }
         }
@@ -44,7 +58,7 @@ pipeline {
                 echo "🧪 Running test playbook..."
                 sh """
                     set -e
-                    ansible-playbook -i hosts.ini test.yml
+                    ansible-playbook -i ${env.INVENTORY_PATH} /home/ec2-user/ansible/test.yml
                 """
             }
         }
@@ -54,7 +68,7 @@ pipeline {
                 echo "🚀 Running deployment playbook for version ${params.VERSION}"
                 sh """
                     set -e
-                    ansible-playbook -i hosts.ini deploy.yml -e version=${params.VERSION}
+                    ansible-playbook -i ${env.INVENTORY_PATH} /home/ec2-user/ansible/deploy.yml -e version=${params.VERSION}
                 """
             }
         }
@@ -68,7 +82,7 @@ pipeline {
             echo "❌ Pipeline failed for version ${params.VERSION}. Please check logs above."
         }
         always {
-            echo "🧹 Cleaning up workspace..."
+            echo "🧹 Cleaning up workspace (not Ansible dir)..."
             cleanWs()
         }
     }
