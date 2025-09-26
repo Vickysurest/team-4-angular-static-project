@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         REPO_URL = 'https://github.com/Vickysurest/team-4-angular-static-project.git'
+        ANSIBLE_HOST_KEY_CHECKING = 'False'
     }
 
     stages {
@@ -15,7 +16,14 @@ pipeline {
             steps {
                 echo "📥 Cloning repository from ${env.REPO_URL}"
                 git url: "${env.REPO_URL}", branch: 'dev'
-                sh 'ls -la'
+                sh 'ls -la'  // Confirm files are there
+            }
+        }
+
+        stage('Verify files') {
+            steps {
+                echo "🔍 Verifying required files"
+                sh 'ls -l hosts.ini build.yml test.yml deploy.yml'
             }
         }
 
