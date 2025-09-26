@@ -2,32 +2,36 @@
 - name: Build Angular App
   hosts: buildserver
   gather_facts: no
+  become: yes  # Required for global npm installs and system-wide changes
   vars:
-    version: "v1.0.0"
-  tasks:
-    - name: Ensure Angular CLI is installed
-      shell: npm install -g @angular/cli
-      args:
-        creates: /usr/bin/ng
+    version: "{{ version | default('v1.0.0') }}"
+    project_dir: /home/ubuntu/angular-app  # ✅ UPDATE to match your project path
+    artifact_dir: /tmp/angular-artifacts
 
-    - name: Install dependencies
+  tasks:
+
+    - name: Ensure Angular CLI is installed
+      shell: npm list -g @angular/cli || npm install -g @angular/cli
+
+    - name: Install project dependencies
       shell: npm install
       args:
-        chdir: /path/to/angular/project
+        chdir: "{{ project_dir }}"
 
     - name: Build Angular app
       shell: ng build --configuration production
       args:
-        chdir: /path/to/angular/project
+        chdir: "{{ project_dir }}"
 
     - name: Create tar.gz artifact
       shell: |
-        mkdir -p /tmp/angular-artifacts
-        tar -czvf /tmp/angular-artifacts/angular-devops-{{ version }}.tar.gz -C /path/to/angular/project/dist/angular-devops .
+        mkdir -p {{ artifact_dir }}
+        tar -czvf {{ artifact_dir }}/angular-devops-{{ version }}.tar.gz -C {{ project_dir }}/dist/angular-devops .
       register: tar_output
 
-    - name: Copy artifact to files directory
-      copy:
-        src: /tmp/angular-artifacts/angular-devops-{{ version }}.tar.gz
-        dest: ./files/
+    - name: Fetch artifact to Jenkins controller (optional)
+      fetch:
+        src: "{{ artifact_dir }}/angular-devops-{{ version }}.tar.gz"
+        dest: "./files/"
+        flat: yes
 ...
