@@ -3,7 +3,11 @@
   hosts: webservers
   become: true
   vars:
-    version: "v1.0.0"
+    version: "{{ version | default('v1.0.0') }}"
+    artifact_name: "angular-devops-{{ version }}.tar.gz"
+    artifact_path: "/tmp/{{ artifact_name }}"
+    deploy_dir: "/var/www/html/angular-app"
+
   roles:
     - apache
     - angular
