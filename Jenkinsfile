@@ -8,57 +8,54 @@ pipeline {
 
     environment {
         REPO_URL = 'https://github.com/Vickysurest/team-4-angular-static-project.git'
-        WORKSPACE_DIR = '.'   // default workspace
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                // Clone the repo
+                echo "📥 Cloning repository from ${REPO_URL}"
                 git url: "${env.REPO_URL}", branch: 'dev'
+                sh 'ls -la'
             }
         }
 
         stage('Build') {
             when { expression { return !params.ROLLBACK } }
             steps {
-                script {
-                    // run the build playbook
-                    sh """
-                        ansible-playbook hosts.ini build.yml -e version=${params.VERSION}
-                    """
-                }
+                echo "🔧 Running build playbook for version ${params.VERSION}"
+                sh '''
+                    ansible-playbook -i hosts.ini build.yml -e "version=${VERSION}"
+                '''
             }
         }
 
         stage('Test') {
             when { expression { return !params.ROLLBACK } }
             steps {
-                script {
-                    sh """
-                        ansible-playbook hosts.ini test.yml
-                    """
-                }
+                echo "🧪 Running test playbook..."
+                sh '''
+                    ansible-playbook -i hosts.ini test.yml
+                '''
             }
         }
 
         stage('Deploy') {
             steps {
-                script {
-                    sh """
-                        ansible-playbook hosts.ini deploy.yml -e version=${params.VERSION}
-                    """
-                }
+                echo "🚀 Running deployment playbook for version ${params.VERSION}"
+                sh '''
+                    ansible-playbook -i hosts.ini deploy.yml -e "version=${VERSION}"
+                '''
             }
         }
     }
 
     post {
         success {
-            echo "✅ Pipeline successful for version ${params.VERSION}."
+            echo "✅ Pipeline completed successfully for version ${params.VERSION}."
         }
         failure {
-            echo "❌ Pipeline failed. Check the logs for errors."
+            echo "❌ Pipeline failed for version ${params.VERSION}. Please check logs above."
         }
     }
 }
