@@ -11,10 +11,9 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                echo "📥 Cloning repository from ${REPO_URL}"
+                echo "📥 Cloning repository from ${env.REPO_URL}"
                 git url: "${env.REPO_URL}", branch: 'dev'
                 sh 'ls -la'
             }
@@ -24,9 +23,10 @@ pipeline {
             when { expression { return !params.ROLLBACK } }
             steps {
                 echo "🔧 Running build playbook for version ${params.VERSION}"
-                sh '''
-                    ansible-playbook -i hosts.ini build.yml -e "version=${VERSION}"
-                '''
+                sh """
+                    set -e
+                    ansible-playbook -i hosts.ini build.yml -e version=${params.VERSION}
+                """
             }
         }
 
@@ -34,18 +34,20 @@ pipeline {
             when { expression { return !params.ROLLBACK } }
             steps {
                 echo "🧪 Running test playbook..."
-                sh '''
+                sh """
+                    set -e
                     ansible-playbook -i hosts.ini test.yml
-                '''
+                """
             }
         }
 
         stage('Deploy') {
             steps {
                 echo "🚀 Running deployment playbook for version ${params.VERSION}"
-                sh '''
-                    ansible-playbook -i hosts.ini deploy.yml -e "version=${VERSION}"
-                '''
+                sh """
+                    set -e
+                    ansible-playbook -i hosts.ini deploy.yml -e version=${params.VERSION}
+                """
             }
         }
     }
@@ -56,6 +58,10 @@ pipeline {
         }
         failure {
             echo "❌ Pipeline failed for version ${params.VERSION}. Please check logs above."
+        }
+        always {
+            echo "🧹 Cleaning up workspace..."
+            cleanWs()
         }
     }
 }
