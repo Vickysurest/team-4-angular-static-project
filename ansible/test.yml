@@ -1,10 +1,20 @@
 ---
 - name: Run Angular Tests
   hosts: buildserver
-  gather_facts: no
+  become: yes
+  gather_facts: yes
+
+  vars:
+    project_dir: /home/ubuntu/angular-app  # ✅ Update this path accordingly
+
   tasks:
-    - name: Run unit tests
+    - name: Ensure dependencies are installed
+      shell: npm install
+      args:
+        chdir: "{{ project_dir }}"
+
+    - name: Run Angular unit tests (headless)
       shell: npm test --watch=false
       args:
-        chdir: /path/to/angular/project
+        chdir: "{{ project_dir }}"
 ...
