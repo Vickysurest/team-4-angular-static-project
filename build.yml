@@ -17,14 +17,20 @@
       args:
         chdir: "{{ project_dir }}"
 
-    - name: Build Angular app
-      shell: ./node_modules/.bin/ng build --configuration production
+    - name: Build Angular app (with verbose)
+      shell: ./node_modules/.bin/ng build --configuration production --verbose
       args:
         chdir: "{{ project_dir }}"
+      register: build_output
+      ignore_errors: yes
+
+    - name: Fail if Angular build really failed
+      fail:
+        msg: "Angular build failed:\n{{ build_output.stderr }}"
+      when: build_output.rc != 0
 
     - name: Create tar.gz artifact
       shell: |
         mkdir -p {{ artifact_dir }}
         tar -czvf {{ artifact_dir }}/angular-devops-{{ version }}.tar.gz -C {{ project_dir }}/dist .
       register: tar_output
-...
