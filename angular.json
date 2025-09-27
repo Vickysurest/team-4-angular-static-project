@@ -24,8 +24,8 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": [],
-            "extractCss": true
+            "scripts": []
+            // REMOVED: "extractCss": true
           },
           "configurations": {
             "production": {
