@@ -46,7 +46,9 @@ pipeline {
             steps {
                 echo "🔧 Running build playbook for version ${params.VERSION}"
                 sh """
-                    ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/build.yml -e version=${params.VERSION}
+                    ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/build.yml \
+                    -e version=${params.VERSION} \
+                    -e project_dir='${env.WORKSPACE}'
                 """
             }
         }
@@ -56,7 +58,8 @@ pipeline {
             steps {
                 echo "🧪 Running test playbook..."
                 sh """
-                    ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/test.yml
+                    ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/test.yml \
+                    -e project_dir='${env.WORKSPACE}'
                 """
             }
         }
@@ -65,7 +68,8 @@ pipeline {
             steps {
                 echo "🚀 Running deployment playbook for version ${params.VERSION}"
                 sh """
-                    ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/deploy.yml -e version=${params.VERSION}
+                    ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/deploy.yml \
+                    -e version=${params.VERSION}
                 """
             }
         }
