@@ -24,7 +24,8 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "extractCss": true
           },
           "configurations": {
             "production": {
@@ -37,7 +38,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
@@ -95,6 +95,5 @@
         }
       }
     }
-  },
-  "defaultProject": "team4-angular-static"
+  }
 }
