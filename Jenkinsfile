@@ -34,6 +34,13 @@ pipeline {
             }
         }
 
+        stage('Install Ansible Collections') {
+            steps {
+                echo "📦 Installing required Ansible collections"
+                sh 'ansible-galaxy collection install community.general'
+            }
+        }
+
         stage('Verify Ansible Inventory') {
             steps {
                 echo "🔍 Verifying Ansible files"
@@ -80,10 +87,16 @@ pipeline {
             echo "✅ Pipeline completed successfully for version ${params.VERSION}."
         }
         failure {
-            echo "❌ Pipeline failed for version ${params.VERSION}. Please check logs above."
+            echo "❌ Pipeline failed for version ${params.VERSION}. Cleaning up artifacts to save disk space..."
+            // Clean up workspace except Ansible files
+            sh """
+                echo '🗑️ Deleting logs, node_modules, dist folders...'
+                find ${env.WORKSPACE} -type d \\( -name 'node_modules' -o -name 'dist' -o -name 'logs' \\) -exec rm -rf {} +
+                echo '🧹 Temporary cleanup done.'
+            """
         }
         always {
-            echo "🧹 Cleaning up workspace (but keeping Ansible files)..."
+            echo "🧹 Final cleanup: cleaning workspace (excluding Ansible files)..."
             cleanWs()
         }
     }
