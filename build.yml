@@ -9,7 +9,28 @@
 
   tasks:
 
-    - name: Ensure Angular CLI is installed
+    - name: Ensure jq is installed (for JSON manipulation)
+      package:
+        name: jq
+        state: present
+
+    - name: Remove 'target' from tsconfig.json safely
+      community.general.jq:
+        src: "{{ project_dir }}/tsconfig.json"
+        filter: 'del(.compilerOptions.target)'
+        pretty: true
+        indent: 2
+
+    - name: Ensure .browserslistrc exists with default config
+      copy:
+        dest: "{{ project_dir }}/.browserslistrc"
+        content: |
+          > 0.5%
+          last 2 versions
+          not dead
+        force: no
+
+    - name: Ensure Angular CLI is installed globally
       shell: npm list -g @angular/cli || npm install -g @angular/cli
 
     - name: Install project dependencies
@@ -17,19 +38,19 @@
       args:
         chdir: "{{ project_dir }}"
 
-    - name: Build Angular app (with verbose)
+    - name: Build Angular app (with verbose output)
       shell: ./node_modules/.bin/ng build --configuration production --verbose
       args:
         chdir: "{{ project_dir }}"
       register: build_output
-      ignore_errors: yes
+      ignore_errors: true
 
-    - name: Fail if Angular build really failed
+    - name: Fail if Angular build failed
       fail:
         msg: "Angular build failed:\n{{ build_output.stderr }}"
       when: build_output.rc != 0
 
-    - name: Create tar.gz artifact
+    - name: Create tar.gz artifact from dist folder
       shell: |
         mkdir -p {{ artifact_dir }}
         tar -czvf {{ artifact_dir }}/angular-devops-{{ version }}.tar.gz -C {{ project_dir }}/dist .
