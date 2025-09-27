@@ -15,6 +15,14 @@ pipeline {
 
     stages {
 
+        stage('Clean Workspace Before Checkout') {
+            when { expression { return !params.ROLLBACK } }
+            steps {
+                echo "🧼 Cleaning workspace before fresh checkout..."
+                cleanWs()
+            }
+        }
+
         stage('Checkout') {
             steps {
                 echo "📥 Cloning repository from ${env.REPO_URL}"
@@ -54,14 +62,6 @@ pipeline {
             steps {
                 echo "🔍 Verifying Ansible files"
                 sh 'ls -l /var/lib/jenkins/ansible/'
-            }
-        }
-
-        stage('Clean Workspace Before Build') {
-            when { expression { return !params.ROLLBACK } }
-            steps {
-                echo "🧼 Cleaning workspace before build..."
-                cleanWs()
             }
         }
 
