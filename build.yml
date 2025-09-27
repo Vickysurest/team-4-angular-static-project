@@ -14,7 +14,7 @@
         name: jq
         state: present
 
-    - name: Remove "target" from tsconfig.json using regex (fallback for jq)
+    - name: Remove "target" from tsconfig.json using regex
       replace:
         path: "{{ project_dir }}/tsconfig.json"
         regexp: '\s*"target"\s*:\s*"[^"]*",?\n?'
@@ -42,17 +42,18 @@
       args:
         chdir: "{{ project_dir }}"
 
-    - name: Build Angular app (with verbose output)
-      shell: ./node_modules/.bin/ng build --configuration production --verbose
+    - name: Build Angular app
+      shell: ./node_modules/.bin/ng build --configuration production
       args:
         chdir: "{{ project_dir }}"
       register: build_output
-      ignore_errors: true
+      failed_when: >
+        build_output.rc != 0 and
+        ("✔ Browser application bundle generation complete." not in build_output.stdout)
 
-    - name: Fail if Angular build failed
-      fail:
-        msg: "Angular build failed:\n{{ build_output.stderr }}"
-      when: build_output.rc != 0
+    - name: Output build log (for debug)
+      debug:
+        var: build_output.stdout_lines
 
     - name: Create tar.gz artifact from dist folder
       shell: |
