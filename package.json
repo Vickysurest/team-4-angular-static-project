@@ -4,7 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --prod"
+    "build": "ng build --prod",
+    "test": "ng test --watch=false --browsers=ChromeHeadless"
   },
   "dependencies": {
     "@angular/animations": "~16.0.0",
@@ -23,6 +24,12 @@
     "@angular-devkit/build-angular": "~16.0.0",
     "@angular/cli": "~16.0.0",
     "@angular/compiler-cli": "~16.0.0",
-    "typescript": "~5.0.0"
+    "typescript": "~5.0.0",
+    "karma": "~6.4.0",
+    "karma-cli": "~2.0.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "jasmine-core": "~4.6.0",
+    "@types/jasmine": "~4.3.0"
   }
 }
