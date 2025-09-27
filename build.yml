@@ -14,12 +14,11 @@
         name: jq
         state: present
 
-    - name: Remove 'target' from tsconfig.json safely
-      community.general.jq:
-        src: "{{ project_dir }}/tsconfig.json"
-        filter: 'del(.compilerOptions.target)'
-        pretty: true
-        indent: 2
+   - name: Remove "target" from tsconfig.json using regex (fallback for jq)
+     replace:
+       path: "{{ project_dir }}/tsconfig.json"
+       regexp: '\s*"target"\s*:\s*"[^"]*",?\n?'
+       replace: ''
 
     - name: Ensure .browserslistrc exists with default config
       copy:
