@@ -2,10 +2,10 @@
 - name: Run Angular Tests
   hosts: buildserver
   become: yes
-  gather_facts: yes
+  gather_facts: no
 
   vars:
-    project_dir: /home/ubuntu/angular-app  # ✅ Update this path accordingly
+    project_dir: "{{ project_dir | default('/tmp/angular-app') }}"  # Now it's dynamic and works with Jenkins
 
   tasks:
     - name: Ensure dependencies are installed
@@ -14,7 +14,7 @@
         chdir: "{{ project_dir }}"
 
     - name: Run Angular unit tests (headless)
-      shell: npm test --watch=false
+      shell: npm test --watch=false --browsers=ChromeHeadless
       args:
         chdir: "{{ project_dir }}"
 ...
