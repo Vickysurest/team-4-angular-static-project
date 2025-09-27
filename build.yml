@@ -1,11 +1,10 @@
----
 - name: Build Angular App
   hosts: buildserver
   gather_facts: no
-  become: yes  # Required for global npm installs and system-wide changes
+  become: yes
   vars:
     version: "{{ version | default('v1.0.0') }}"
-    project_dir: /var/lib/jenkins/workspace/Team4-angular-static-devops-deploy  # ✅ Updated path
+    project_dir: "{{ project_dir | default('/tmp/angular-app') }}"
     artifact_dir: /tmp/angular-artifacts
 
   tasks:
@@ -19,19 +18,13 @@
         chdir: "{{ project_dir }}"
 
     - name: Build Angular app
-      shell: ng build --configuration production
+      shell: ./node_modules/.bin/ng build --configuration production
       args:
         chdir: "{{ project_dir }}"
 
     - name: Create tar.gz artifact
       shell: |
         mkdir -p {{ artifact_dir }}
-        tar -czvf {{ artifact_dir }}/angular-devops-{{ version }}.tar.gz -C {{ project_dir }}/dist/angular-devops .
+        tar -czvf {{ artifact_dir }}/angular-devops-{{ version }}.tar.gz -C {{ project_dir }}/dist .
       register: tar_output
-
-    - name: Fetch artifact to Jenkins controller (optional)
-      fetch:
-        src: "{{ artifact_dir }}/angular-devops-{{ version }}.tar.gz"
-        dest: "./files/"
-        flat: yes
 ...
