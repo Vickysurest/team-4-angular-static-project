@@ -57,6 +57,14 @@ pipeline {
             }
         }
 
+        stage('Clean Workspace Before Build') {
+            when { expression { return !params.ROLLBACK } }
+            steps {
+                echo "🧼 Cleaning workspace before build..."
+                cleanWs()
+            }
+        }
+
         stage('Build') {
             when { expression { return !params.ROLLBACK } }
             steps {
@@ -100,7 +108,6 @@ pipeline {
         }
         failure {
             echo "❌ Pipeline failed for version ${params.VERSION}. Cleaning up artifacts to save disk space..."
-            // Clean up workspace except Ansible files
             sh """
                 echo '🗑️ Deleting logs, node_modules, dist folders...'
                 find ${env.WORKSPACE} -type d \\( -name 'node_modules' -o -name 'dist' -o -name 'logs' \\) -exec rm -rf {} +
