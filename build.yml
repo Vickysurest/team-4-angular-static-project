@@ -5,7 +5,7 @@
   become: yes  # Required for global npm installs and system-wide changes
   vars:
     version: "{{ version | default('v1.0.0') }}"
-    project_dir: /home/ubuntu/angular-app  # ✅ UPDATE to match your project path
+    project_dir: /var/lib/jenkins/workspace/Team4-angular-static-devops-deploy  # ✅ Updated path
     artifact_dir: /tmp/angular-artifacts
 
   tasks:
