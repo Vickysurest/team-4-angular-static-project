@@ -56,6 +56,6 @@
         chdir: "{{ project_dir }}"
 
     - name: Run Angular unit tests (headless)
-      shell: npm test --watch=false
+      shell: npm test
       args:
         chdir: "{{ project_dir }}"

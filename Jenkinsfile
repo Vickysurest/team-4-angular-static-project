@@ -14,7 +14,6 @@ pipeline {
     }
 
     stages {
-
         stage('Clean Workspace Before Checkout') {
             when { expression { return !params.ROLLBACK } }
             steps {
@@ -65,13 +64,15 @@ pipeline {
             }
         }
 
-        stage('Install Jest Dev Dependencies') {
+        stage('Setup Jest') {
             when { expression { return !params.ROLLBACK } }
             steps {
-                echo "📦 Installing Jest dev dependencies (compatible with Angular 16)..."
-                sh '''
-                    npm install --save-dev jest@29 @types/jest@29 ts-jest@29 jest-preset-angular@13
-                '''
+                echo "🧪 Installing Jest and related dependencies..."
+                sh """
+                    cd ${env.WORKSPACE}
+                    npm install --legacy-peer-deps --save-dev jest ts-jest @types/jest jest-preset-angular
+                    npx ts-jest config:init
+                """
             }
         }
 
