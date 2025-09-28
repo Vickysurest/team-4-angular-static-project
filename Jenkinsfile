@@ -138,7 +138,8 @@ pipeline {
                 sh """
                     export ANSIBLE_COLLECTIONS_PATHS=${env.ANSIBLE_COLLECTIONS_PATHS}
                     ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/deploy.yml \
-                    -e version=${params.VERSION}
+                    -e version=${params.VERSION} \
+                    -e workspace='${env.WORKSPACE}'
                 """
             }
         }

@@ -5,17 +5,19 @@
   vars:
     version: "{{ version | default('v1.0.0') }}"
     artifact_name: "angular-devops-{{ version }}.tar.gz"
-    artifact_src: "/var/lib/jenkins/ansible/artifacts/{{ artifact_name }}"
+    workspace: "{{ workspace | default('/var/lib/jenkins/workspace') }}"
+    artifact_src: "{{ workspace }}/{{ artifact_name }}"
     artifact_dest: "/tmp/{{ artifact_name }}"
     deploy_dir: "/var/www/html/angular-app"
 
   tasks:
     - name: Check artifact exists locally on Jenkins
-      local_action:
-        module: command
-        args:
-          cmd: ls -l "{{ artifact_src }}"
+      ansible.builtin.stat:
+        path: "{{ artifact_src }}"
+      register: artifact_check
+      delegate_to: localhost
       become: false
+      failed_when: not artifact_check.stat.exists
 
     - name: Install Apache
       package:
