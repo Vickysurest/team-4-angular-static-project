@@ -39,7 +39,6 @@ pipeline {
                     cp build.yml /var/lib/jenkins/ansible/
                     cp test.yml /var/lib/jenkins/ansible/
                     cp deploy.yml /var/lib/jenkins/ansible/
-                    cp fetch_artifact.yml /var/lib/jenkins/ansible/
                 """
             }
         }
@@ -89,17 +88,6 @@ pipeline {
             }
         }
 
-        stage('Fetch Artifact') {
-            when { expression { return !params.ROLLBACK } }
-            steps {
-                echo "📥 Fetching artifact from buildserver to Jenkins..."
-                sh """
-                    export ANSIBLE_COLLECTIONS_PATHS=${env.ANSIBLE_COLLECTIONS_PATHS}
-                    ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/fetch_artifact.yml -e version=${params.VERSION}
-                """
-            }
-        }
-
         stage('Test') {
             when { expression { return !params.ROLLBACK } }
             steps {
@@ -108,6 +96,20 @@ pipeline {
                     export ANSIBLE_COLLECTIONS_PATHS=${env.ANSIBLE_COLLECTIONS_PATHS}
                     ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/test.yml \
                     -e project_dir='${env.WORKSPACE}'
+                """
+            }
+        }
+
+        stage('Copy Artifact to Deploy Servers') {
+            steps {
+                echo "📤 Copying artifact to deploy server(s)..."
+                sh """
+                    ARTIFACT="${env.WORKSPACE}/angular-devops-${params.VERSION}.tar.gz"
+                    DEPLOY_HOSTS=\$(ansible -i ${env.INVENTORY_PATH} webservers --list-hosts | tail -n +2 | tr -d ' ')
+                    for host in \$DEPLOY_HOSTS; do
+                        echo "Copying artifact to \$host"
+                        scp \$ARTIFACT \$host:/tmp/
+                    done
                 """
             }
         }
