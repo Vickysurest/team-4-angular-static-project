@@ -60,3 +60,11 @@
         mkdir -p {{ artifact_dir }}
         tar -czvf {{ artifact_dir }}/angular-devops-{{ version }}.tar.gz -C {{ project_dir }}/dist .
       register: tar_output
+
+    - name: Copy build artifacts to workspace
+      copy:
+        src: "{{ project_dir }}/dist/"
+        dest: "{{ artifact_dir }}/{{ version }}/"
+        remote_src: yes
+
+

@@ -89,6 +89,21 @@ pipeline {
             }
         }
 
+        // ✅ ✅ ✅ NEW STAGE: Pull artifact from buildserver into Jenkins workspace
+        stage('Retrieve Artifact from Build Server') {
+            steps {
+                echo "📦 Retrieving built artifact from build server into Jenkins workspace..."
+                sh """
+                    BUILD_HOST=\$(ansible -i ${env.INVENTORY_PATH} buildserver --list-hosts | tail -n 2 | tr -d ' ')
+                    IP=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \$BUILD_HOST | grep ansible_host | awk '{print \$2}' | tr -d '",')
+                    USER=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \$BUILD_HOST | grep ansible_user | awk '{print \$2}' | tr -d '",')
+
+                    echo "➡️ Copying artifact from \$USER@\$IP to Jenkins workspace..."
+                    scp -i ${env.SSH_KEY} -o StrictHostKeyChecking=no \$USER@\$IP:/tmp/angular-artifacts/angular-devops-${params.VERSION}.tar.gz ${env.WORKSPACE}/
+                """
+            }
+        }
+
         stage('Test') {
             when { expression { return !params.ROLLBACK } }
             steps {
@@ -127,6 +142,24 @@ pipeline {
                     -e version=${params.VERSION}
                 """
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline completed successfully for version ${params.VERSION}."
+        }
+        failure {
+            echo "❌ Pipeline failed for version ${params.VERSION}. Cleaning up artifacts to save disk space..."
+            sh """
+                echo '🗑️ Deleting logs, node_modules, dist folders...'
+                find ${env.WORKSPACE} -type d \\( -name 'node_modules' -o -name 'dist' -o -name 'logs' \\) -exec rm -rf {} +
+                echo '🧹 Temporary cleanup done.'
+            """
+        }
+        always {
+            echo "🧹 Final cleanup: cleaning workspace (excluding Ansible files)..."
+            cleanWs()
         }
     }
 }
