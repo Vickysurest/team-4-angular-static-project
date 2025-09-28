@@ -16,46 +16,12 @@
           - ca-certificates
         state: present
 
-    - name: Ensure /usr/share/keyrings exists
-      file:
-        path: /usr/share/keyrings
-        state: directory
-        mode: '0755'
-
-    - name: Ensure /etc/apt/sources.list.d exists
-      file:
-        path: /etc/apt/sources.list.d
-        state: directory
-        mode: '0755'
-
-    - name: Download Google Chrome signing key
-      get_url:
-        url: https://dl.google.com/linux/linux_signing_key.pub
-        dest: /usr/share/keyrings/google-chrome.gpg
-        mode: '0644'
-
-    - name: Add Google Chrome APT repository (with signed-by)
-      copy:
-        dest: /etc/apt/sources.list.d/google-chrome.list
-        content: |
-          deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main
-        mode: '0644'
-
-    - name: Update apt cache
-      apt:
-        update_cache: yes
-
-    - name: Install Google Chrome stable
-      apt:
-        name: google-chrome-stable
-        state: present
-
-    - name: Install project dependencies
-      shell: npm install
+    - name: Install project dependencies (with peer dep workaround)
+      shell: npm install --legacy-peer-deps
       args:
         chdir: "{{ project_dir }}"
 
-    - name: Run Angular unit tests (headless)
+    - name: Run Angular unit tests with Jest
       shell: npm test
       args:
         chdir: "{{ project_dir }}"
