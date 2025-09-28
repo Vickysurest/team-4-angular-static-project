@@ -39,6 +39,7 @@ pipeline {
                     cp build.yml /var/lib/jenkins/ansible/
                     cp test.yml /var/lib/jenkins/ansible/
                     cp deploy.yml /var/lib/jenkins/ansible/
+                    cp fetch_artifact.yml /var/lib/jenkins/ansible/
                 """
             }
         }
