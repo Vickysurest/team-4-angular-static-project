@@ -89,17 +89,16 @@ pipeline {
             }
         }
 
-        // ✅ ✅ ✅ NEW STAGE: Pull artifact from buildserver into Jenkins workspace
         stage('Retrieve Artifact from Build Server') {
             steps {
                 echo "📦 Retrieving built artifact from build server into Jenkins workspace..."
                 sh """
-                    BUILD_HOST=$(ansible -i ${env.INVENTORY_PATH} buildserver --list-hosts | tail -n +2 | awk '{$1=$1; print}' | head -n 1)
-                    IP=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \$BUILD_HOST | grep ansible_host | awk '{print \$2}' | tr -d '",')
-                    USER=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \$BUILD_HOST | grep ansible_user | awk '{print \$2}' | tr -d '",')
+                    BUILD_HOST=\$(ansible -i ${env.INVENTORY_PATH} buildserver --list-hosts | tail -n +2 | awk '{\$1=\$1; print}' | head -n 1)
+                    IP=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \${BUILD_HOST} | grep ansible_host | awk '{print \$2}' | tr -d '",')
+                    USER=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \${BUILD_HOST} | grep ansible_user | awk '{print \$2}' | tr -d '",')
 
-                    echo "➡️ Copying artifact from \$USER@\$IP to Jenkins workspace..."
-                    scp -i ${env.SSH_KEY} -o StrictHostKeyChecking=no \$USER@\$IP:/tmp/angular-artifacts/angular-devops-${params.VERSION}.tar.gz ${env.WORKSPACE}/
+                    echo "➡️ Copying artifact from \${USER}@\${IP} to Jenkins workspace..."
+                    scp -i ${env.SSH_KEY} -o StrictHostKeyChecking=no \${USER}@\${IP}:/tmp/angular-artifacts/angular-devops-${params.VERSION}.tar.gz ${env.WORKSPACE}/
                 """
             }
         }
