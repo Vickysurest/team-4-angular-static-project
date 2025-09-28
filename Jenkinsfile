@@ -3,7 +3,7 @@ pipeline {
 
     parameters {
         string(name: 'VERSION', defaultValue: 'v1.0.0', description: 'Version to build or deploy')
-        booleanParam(name: 'ROLLBACK', defaultValue: false, description: 'Set to true to rollback to previous version (skip build & test)')
+        booleanParam(name: 'ROLLBACK', defaultValue: true, description: 'Set to true to rollback to previous version (skip build & test)')
     }
 
     environment {
