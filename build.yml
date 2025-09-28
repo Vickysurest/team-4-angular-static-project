@@ -42,8 +42,8 @@
       args:
         chdir: "{{ project_dir }}"
 
-    - name: Build Angular app
-      shell: ./node_modules/.bin/ng build --configuration production
+    - name: Build Angular app with base href
+      shell: ./node_modules/.bin/ng build --configuration production --base-href /angular-app/
       args:
         chdir: "{{ project_dir }}"
       register: build_output
