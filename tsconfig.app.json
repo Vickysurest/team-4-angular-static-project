@@ -11,5 +11,9 @@
   "include": [
     "src/**/*.d.ts",
     "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.spec.ts",   // ✅ Exclude Jest test files
+    "src/test.ts"     // ✅ Optional, unless it's used in your app build
   ]
 }
