@@ -13,8 +13,13 @@
       args:
         chdir: "{{ project_dir }}"
 
+    - name: Ensure Chromium is installed for headless testing
+      package:
+        name: chromium-browser
+        state: present
+
     - name: Run Angular unit tests (headless)
-      shell: npm test --watch=false --browsers=ChromeHeadless
+      shell: npm test --watch=false
       args:
         chdir: "{{ project_dir }}"
 ...
