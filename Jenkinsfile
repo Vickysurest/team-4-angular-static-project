@@ -129,22 +129,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        success {
-            echo "✅ Pipeline completed successfully for version ${params.VERSION}."
-        }
-        failure {
-            echo "❌ Pipeline failed for version ${params.VERSION}. Cleaning up artifacts to save disk space..."
-            sh """
-                echo '🗑️ Deleting logs, node_modules, dist folders...'
-                find ${env.WORKSPACE} -type d \\( -name 'node_modules' -o -name 'dist' -o -name 'logs' \\) -exec rm -rf {} +
-                echo '🧹 Temporary cleanup done.'
-            """
-        }
-        always {
-            echo "🧹 Final cleanup: cleaning workspace (excluding Ansible files)..."
-            cleanWs()
-        }
-    }
 }
