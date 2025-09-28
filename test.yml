@@ -5,7 +5,7 @@
   gather_facts: no
 
   vars:
-    project_dir: "{{ project_dir | default('/tmp/angular-app') }}"  # Now it's dynamic and works with Jenkins
+    project_dir: "{{ project_dir | default('/tmp/angular-app') }}"
 
   tasks:
     - name: Ensure dependencies are installed
@@ -13,13 +13,19 @@
       args:
         chdir: "{{ project_dir }}"
 
-    - name: Ensure Chromium is installed for headless testing
-      package:
-        name: chromium-browser
-        state: present
+    - name: Install Google Chrome stable
+      become: yes
+      shell: |
+        if ! command -v google-chrome &> /dev/null; then
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
+          apt-get update
+          apt-get install -y google-chrome-stable
+        fi
+      args:
+        executable: /bin/bash
 
     - name: Run Angular unit tests (headless)
       shell: npm test --watch=false
       args:
         chdir: "{{ project_dir }}"
-...
