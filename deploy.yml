@@ -8,6 +8,30 @@
     artifact_path: "/tmp/{{ artifact_name }}"
     deploy_dir: "/var/www/html/angular-app"
 
-  roles:
-    - apache
-    - angular
+  tasks:
+    - name: Install Apache
+      package:
+        name: apache2
+        state: present
+
+    - name: Ensure deploy directory exists
+      file:
+        path: "{{ deploy_dir }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Extract Angular artifact
+      unarchive:
+        src: "{{ artifact_path }}"
+        dest: "{{ deploy_dir }}"
+        remote_src: yes
+        owner: www-data
+        group: www-data
+
+    - name: Restart Apache service
+      service:
+        name: apache2
+        state: restarted
+        enabled: yes
