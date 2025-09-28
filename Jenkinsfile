@@ -11,6 +11,7 @@ pipeline {
         ANSIBLE_HOST_KEY_CHECKING = 'False'
         INVENTORY_PATH = '/var/lib/jenkins/ansible/hosts.ini'
         ANSIBLE_COLLECTIONS_PATHS = "${HOME}/.ansible/collections:/usr/share/ansible/collections"
+        SSH_KEY = '/var/lib/jenkins/.ssh/apple.pem'
     }
 
     stages {
@@ -106,9 +107,12 @@ pipeline {
                 sh """
                     ARTIFACT="${env.WORKSPACE}/angular-devops-${params.VERSION}.tar.gz"
                     DEPLOY_HOSTS=\$(ansible -i ${env.INVENTORY_PATH} webservers --list-hosts | tail -n +2 | tr -d ' ')
+                    
                     for host in \$DEPLOY_HOSTS; do
-                        echo "Copying artifact to \$host"
-                        scp \$ARTIFACT \$host:/tmp/
+                        IP=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \$host | grep ansible_host | awk '{print \$2}' | tr -d '"')
+                        USER=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \$host | grep ansible_user | awk '{print \$2}' | tr -d '"')
+                        echo "🔄 Copying artifact to \$host (\$USER@\$IP)"
+                        scp -i ${env.SSH_KEY} -o StrictHostKeyChecking=no \$ARTIFACT \$USER@\$IP:/tmp/
                     done
                 """
             }
