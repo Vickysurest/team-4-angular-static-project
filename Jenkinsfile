@@ -68,10 +68,10 @@ pipeline {
         stage('Install Jest Dev Dependencies') {
             when { expression { return !params.ROLLBACK } }
             steps {
-                echo "📦 Installing Jest dev dependencies..."
-                sh """
-                    npm install --save-dev jest @types/jest jest-preset-angular ts-jest
-                """
+                echo "📦 Installing Jest dev dependencies (compatible with Angular 16)..."
+                sh '''
+                    npm install --save-dev jest@29 @types/jest@29 ts-jest@29 jest-preset-angular@13
+                '''
             }
         }
 
@@ -82,8 +82,8 @@ pipeline {
                 sh """
                     export ANSIBLE_COLLECTIONS_PATHS=${env.ANSIBLE_COLLECTIONS_PATHS}
                     ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/build.yml \
-                      -e version=${params.VERSION} \
-                      -e project_dir='${env.WORKSPACE}'
+                    -e version=${params.VERSION} \
+                    -e project_dir='${env.WORKSPACE}'
                 """
             }
         }
@@ -91,11 +91,11 @@ pipeline {
         stage('Test') {
             when { expression { return !params.ROLLBACK } }
             steps {
-                echo "🧪 Running test playbook..."
+                echo "🧪 Running test playbook using Jest..."
                 sh """
                     export ANSIBLE_COLLECTIONS_PATHS=${env.ANSIBLE_COLLECTIONS_PATHS}
                     ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/test.yml \
-                      -e project_dir='${env.WORKSPACE}'
+                    -e project_dir='${env.WORKSPACE}'
                 """
             }
         }
@@ -106,7 +106,7 @@ pipeline {
                 sh """
                     export ANSIBLE_COLLECTIONS_PATHS=${env.ANSIBLE_COLLECTIONS_PATHS}
                     ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/deploy.yml \
-                      -e version=${params.VERSION}
+                    -e version=${params.VERSION}
                 """
             }
         }
