@@ -16,16 +16,18 @@
           - ca-certificates
         state: present
 
-    - name: Add Google Chrome signing key
-      apt_key:
+    - name: Download Google Chrome signing key
+      get_url:
         url: https://dl.google.com/linux/linux_signing_key.pub
-        state: present
+        dest: /usr/share/keyrings/google-chrome.gpg
+        mode: '0644'
 
-    - name: Add Google Chrome APT repository
-      apt_repository:
-        repo: "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
-        state: present
-        filename: google-chrome
+    - name: Add Google Chrome APT repository (with signed-by)
+      copy:
+        dest: /etc/apt/sources.list.d/google-chrome.list
+        content: |
+          deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main
+        mode: '0644'
 
     - name: Update apt cache
       apt:
