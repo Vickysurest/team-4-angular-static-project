@@ -14,6 +14,7 @@
         module: command
         args:
           cmd: ls -l "{{ local_artifact_path }}"
+      become: false
 
     - name: Install Apache
       package:
