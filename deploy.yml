@@ -1,14 +1,20 @@
----
 - name: Deploy Angular App to Apache Server
   hosts: webservers
   become: true
   vars:
     version: "{{ version | default('v1.0.0') }}"
+    local_artifact_path: "/var/lib/jenkins/workspace/Team4-angular-static-devops-deploy/angular-devops-{{ version }}.tar.gz"
     artifact_name: "angular-devops-{{ version }}.tar.gz"
     artifact_path: "/tmp/{{ artifact_name }}"
     deploy_dir: "/var/www/html/angular-app"
 
   tasks:
+    - name: Check artifact exists locally
+      local_action:
+        module: command
+        args:
+          cmd: ls -l "{{ local_artifact_path }}"
+
     - name: Install Apache
       package:
         name: apache2
@@ -21,6 +27,11 @@
         owner: www-data
         group: www-data
         mode: '0755'
+
+    - name: Copy Angular artifact to remote server
+      copy:
+        src: "{{ local_artifact_path }}"
+        dest: "{{ artifact_path }}"
 
     - name: Extract Angular artifact
       unarchive:
