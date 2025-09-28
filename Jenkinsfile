@@ -94,7 +94,7 @@ pipeline {
             steps {
                 echo "📦 Retrieving built artifact from build server into Jenkins workspace..."
                 sh """
-                    BUILD_HOST=\$(ansible -i ${env.INVENTORY_PATH} buildserver --list-hosts | tail -n 2 | tr -d ' ')
+                    BUILD_HOST=$(ansible -i ${env.INVENTORY_PATH} buildserver --list-hosts | tail -n +2 | awk '{$1=$1; print}' | head -n 1)
                     IP=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \$BUILD_HOST | grep ansible_host | awk '{print \$2}' | tr -d '",')
                     USER=\$(ansible-inventory -i ${env.INVENTORY_PATH} --host \$BUILD_HOST | grep ansible_user | awk '{print \$2}' | tr -d '",')
 
