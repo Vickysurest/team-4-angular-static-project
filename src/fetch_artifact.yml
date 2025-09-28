@@ -1,0 +1,12 @@
+- name: Fetch artifact from buildserver to Jenkins master
+  hosts: localhost
+  gather_facts: no
+  vars:
+    version: "{{ version | default('v1.0.0') }}"
+  tasks:
+    - name: Fetch artifact from buildserver
+      fetch:
+        src: "/tmp/angular-artifacts/angular-devops-{{ version }}.tar.gz"
+        dest: "/var/lib/jenkins/ansible/artifacts/"
+        flat: yes
+      delegate_to: buildserver

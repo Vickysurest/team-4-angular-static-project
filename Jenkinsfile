@@ -88,6 +88,17 @@ pipeline {
             }
         }
 
+        stage('Fetch Artifact') {
+            when { expression { return !params.ROLLBACK } }
+            steps {
+                echo "📥 Fetching artifact from buildserver to Jenkins..."
+                sh """
+                    export ANSIBLE_COLLECTIONS_PATHS=${env.ANSIBLE_COLLECTIONS_PATHS}
+                    ansible-playbook -i ${env.INVENTORY_PATH} /var/lib/jenkins/ansible/fetch_artifact.yml -e version=${params.VERSION}
+                """
+            }
+        }
+
         stage('Test') {
             when { expression { return !params.ROLLBACK } }
             steps {
