@@ -71,7 +71,6 @@ pipeline {
                 sh """
                     cd ${env.WORKSPACE}
                     npm install --legacy-peer-deps --save-dev jest ts-jest @types/jest jest-preset-angular
-                    npx ts-jest config:init
                 """
             }
         }
