@@ -16,6 +16,12 @@
           - ca-certificates
         state: present
 
+    - name: Ensure /usr/share/keyrings exists
+      file:
+        path: /usr/share/keyrings
+        state: directory
+        mode: '0755'
+
     - name: Download Google Chrome signing key
       get_url:
         url: https://dl.google.com/linux/linux_signing_key.pub
