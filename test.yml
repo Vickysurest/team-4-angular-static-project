@@ -8,22 +8,38 @@
     project_dir: "{{ project_dir | default('/tmp/angular-app') }}"
 
   tasks:
-    - name: Ensure dependencies are installed
+    - name: Ensure required tools are present
+      package:
+        name:
+          - wget
+          - gnupg
+          - ca-certificates
+        state: present
+
+    - name: Add Google Chrome signing key
+      apt_key:
+        url: https://dl.google.com/linux/linux_signing_key.pub
+        state: present
+
+    - name: Add Google Chrome APT repository
+      apt_repository:
+        repo: "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
+        state: present
+        filename: google-chrome
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Google Chrome stable
+      apt:
+        name: google-chrome-stable
+        state: present
+
+    - name: Install project dependencies
       shell: npm install
       args:
         chdir: "{{ project_dir }}"
-
-    - name: Install Google Chrome stable
-      become: yes
-      shell: |
-        if ! command -v google-chrome &> /dev/null; then
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
-          apt-get update
-          apt-get install -y google-chrome-stable
-        fi
-      args:
-        executable: /bin/bash
 
     - name: Run Angular unit tests (headless)
       shell: npm test --watch=false
